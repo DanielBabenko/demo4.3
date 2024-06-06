@@ -2,10 +2,12 @@ package models;
 
 
 import database.HibernateManager;
+import utils.Checker;
 
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import java.io.Serializable;
 import java.util.List;
@@ -13,14 +15,14 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @ManagedBean(name = "attempts", eager = true)
-@ApplicationScoped
+@SessionScoped
 public class CollectionAttemptsBean implements Serializable {
     //нужно использовать потокобезопасные коллекции,
     // потому что взаимодействия с коллекциями могут происходить в разных потоках.
     private final CopyOnWriteArrayList<Attempt> attempts;
     private final HibernateManager hibernateManager;
 
-    private Attempt currentAttempt = new Attempt("0", "0", "2");
+    private Attempt currentAttempt = new Attempt("0", "0", "3");
 
     public CollectionAttemptsBean() {
         hibernateManager = new HibernateManager();
@@ -41,8 +43,12 @@ public class CollectionAttemptsBean implements Serializable {
         hibernateManager.clearAttempts();
     }
 
+    public void attemptsClear(){
+        attempts.clear();
+    }
+
     public List<Attempt> getAttempts() {
-        return attempts;
+        return hibernateManager.getAttempts();
     }
 
     public void addFromForm() {

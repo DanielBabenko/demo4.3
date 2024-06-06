@@ -1,0 +1,290 @@
+<project name="OPI3" default="build">
+    <property file="build.properties"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="*.jar"/>
+        <fileset dir="${src.main.dir}" includes="*.java"/>
+    </path>
+
+    <path id="classpath.test">
+        <pathelement location="${junit}"/>
+        <pathelement location="${hamcrest}"/>
+        <pathelement location="${classes.dir}"/>
+    </path>
+
+    <path id="classpath.source">
+        <fileset dir="src/main/lib" includes="**/*.jar"/>
+    </path>
+
+    <path id="classpath.testSource">
+        <fileset dir="src/test/lib" includes="**/*.jar"/>
+    </path>
+
+    <path id="project.classpath">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <path id="test.classpath">
+        <path refid="project.classpath" />
+        <pathelement location="${build.dir}/webapp/WEB-INF/classes" />
+        <pathelement location="${build.dir}/test-classes" />
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <!-- Clean -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${junit.report.dir}"/>
+        <echo message="––– CLEAN DONE –––"/>
+    </target>
+
+    <!-- Compile -->
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${test.classes.dir}"/>
+        <javac srcdir="${src.main.dir}" destdir="${classes.dir}" classpathref="classpath" source="1.8"
+               includeantruntime="false"/>
+        <copy todir="${classes.dir}">
+            <fileset dir="${resources.dir}"/>
+        </copy>
+        <echo message="––– COMPILE DONE –––"/>
+    </target>
+
+    <!-- Build -->
+    <target name="build" depends="compile">
+        <copy todir="${artifact.dir}" >
+            <fileset dir="${web.dir}"/>
+        </copy>
+        <copy todir="${artifact-lib.dir}">
+            <fileset dir="${lib.dir}"/>
+        </copy>
+        <jar destfile="${build.dir}/${ant.project.name}.jar">
+            <fileset dir="${artifact.dir}"/>
+            <manifest>
+                <attribute name="Manifest-Version" value="1.0" />
+                <attribute name="Main-Class" value="NoClass" />
+            </manifest>
+        </jar>
+        <echo message="––– BUILD DONE –––"/>
+    </target>
+
+    <target name="init">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${classes.dir}" />
+        <mkdir dir="${target.tests}"/>
+    </target>
+
+    <target name="compileTest" depends="init">
+        <javac destdir="${target.tests}"
+               srcdir="${test.source}"
+               includeantruntime="false">
+            <classpath refid="classpath.testSource"/>
+        </javac>
+        <echo message="Successfully compiled tests"/>
+    </target>
+
+    <property name="testreports" location="${test.result.dir}" />
+
+<!--    <target name="test" depends="compileTest">-->
+<!--&lt;!&ndash;        <mkdir dir="${test.result.dir}"/>&ndash;&gt;-->
+<!--        <junitlauncher printsummary="on" haltonfailure="yes">-->
+<!--            <classpath refid="classpath.testSource"/>-->
+<!--            <testclasses outputdir="${testreports}">-->
+<!--                <fileset dir="${target.tests}" includes="**/*Test.class" />-->
+<!--                <listener type="legacy-xml" sendSysOut="true" sendSysErr="true"/>-->
+<!--            </testclasses>-->
+<!--        </junitlauncher>-->
+<!--        <echo message="Test completed"/>-->
+<!--    </target>-->
+
+    <!-- Test -->
+    <target name="test" depends="build, compileTest">
+        <mkdir dir="${test.classes.dir}"/>
+        <javac destdir="${test.classes.dir}" srcdir="${src.main.dir}" classpathref="classpath.testSource" includeantruntime="false"/>
+        <junit printsummary="yes">
+            <classpath>
+                <path refid="classpath.testSource"/>
+                <pathelement location="${test.classes.dir}"/>
+            </classpath>
+            <batchtest fork="yes" todir="${test.classes.dir}">
+                <formatter type="xml"/>
+                <fileset dir="${target.tests}" includes="**/*Test.class" />
+            </batchtest>
+        </junit>
+    </target>
+
+    <!-- XML -->
+    <target name="xml">
+        <xmlvalidate lenient="true">
+            <fileset dir="${basedir}">
+                <include name="**/*.xml" />
+            </fileset>
+        </xmlvalidate>
+        <echo message="––– XML VALIDATION COMPLETED –––"/>
+    </target>
+
+    <!-- ENV -->
+    <target name="env" depends="scp">
+        <echo>Starting web server...</echo>
+        <sshexec host="${scp.host}"
+                 username="${scp.user}"
+                 password="${scp.password}"
+                 port="${scp.port}"
+                 trust="true"
+                 command="sh ${env.script}"/>
+    </target>
+
+    <!-- Native2ASCII -->
+    <target name="native2ascii">
+        <native2ascii encoding="UTF-8" dest="${build.dir}/webapp/WEB-INF/classes" src="${resources.dir}">
+            <include name="**/*.properties" />
+        </native2ascii>
+        <echo message="––– NATIVE2ASCII COMPLETED –––"/>
+    </target>
+
+    <!-- Doc -->
+    <target name="doc" depends="build">
+        <mkdir dir="doc/documentation"/>
+        <signjar jar="${build.dir}/${ant.project.name}.jar"
+                 alias="ant_keystore"
+                 storepass="msc114"
+                 keystore="keystore"
+                 sigalg="MD5withRSA"
+                 digestalg="SHA1"/>
+        <javadoc
+                destdir="doc/documentation"
+                author="true"
+                version="true"
+                use="true">
+            <classpath>
+                <path refid="classpath"/>
+            </classpath>
+            <fileset dir="${src.main.dir}"/>
+        </javadoc>
+        <jar destfile="${build.dir}/${ant.project.name}.jar"
+             basedir="doc/documentation"
+             update="true">
+        </jar>
+    </target>
+
+    <!-- SCP -->
+    <target name="scp" depends="build">
+        <echo>Connecting...</echo>
+        <scp file="${build.dir}/${ant.project.name}.jar"
+             todir="${scp.user}@${scp.host}:${scp.dir}"
+             password="${scp.password}"
+             port="${scp.port}"
+             trust="true"/>
+    </target>
+<!--    Файл лежит в папке Hamza52-->
+
+    <!-- History -->
+    <target name="history">
+        <exec executable="git" outputproperty="current.revision" failonerror="false">
+            <arg value="rev-parse"/>
+            <arg value="HEAD"/>
+        </exec>
+
+        <property name="previous.revision" value="HEAD"/>
+        <property name="found.working.revision" value="false"/>
+
+        <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+            <classpath>
+                <pathelement location="${lib.dir}/ant-contrib.jar"/>
+            </classpath>
+        </taskdef>
+
+        <foreach list="${previous.revision}" param="revision" target="find-working-revision">
+            <param name="revision" value="${previous.revision}"/>
+        </foreach>
+    </target>
+
+    <target name="find-working-revision">
+        <exec executable="git" failonerror="false">
+            <arg value="checkout"/>
+            <arg value="${revision}"/>
+        </exec>
+
+        <trycatch>
+            <try>
+                <antcall target="compile"/>
+                <echo>Found working revision: ${revision}</echo>
+                <exec executable="git" output="${build.dir}/diff.txt" failonerror="false">
+                    <arg value="diff"/>
+                    <arg value="${revision}~1"/>
+                    <arg value="${current.revision}"/>
+                </exec>
+                <exec executable="git" failonerror="false">
+                    <arg value="checkout"/>
+                    <arg value="${current.revision}"/>
+                </exec>
+                <fail message="Compilation fixed. Please check diff.txt for changes."/>
+            </try>
+            <catch>
+                <echo>Compilation failed on revision: ${revision}. Checking previous revision...</echo>
+            </catch>
+        </trycatch>
+    </target>
+
+    <!-- Report -->
+    <target name="report" depends="test">
+        <mkdir dir="${doc.report.dir}"/>
+        <copy todir="${doc.report.dir}">
+            <fileset dir="${test.classes.dir}" includes="*.xml"/>
+        </copy>
+        <sequential>
+            <exec executable="git">
+                <arg value="add"/>
+                <arg value="${doc.report.dir}/*"/>
+            </exec>
+            <exec executable="git">
+                <arg value="commit"/>
+                <arg value="-m"/>
+                <arg value="passed tests"/>
+            </exec>
+        </sequential>
+    </target>
+
+    <!-- Team -->
+    <target name="team">
+        <exec executable="git" outputproperty="current.revision" failonerror="false">
+            <arg value="rev-parse"/>
+            <arg value="HEAD"/>
+        </exec>
+
+        <property name="revision1" value="${current.revision}~1"/>
+        <property name="revision2" value="${current.revision}~2"/>
+
+        <echo>Building revision: ${revision1}</echo>
+        <exec executable="git" failonerror="false">
+            <arg value="checkout"/>
+            <arg value="${revision1}"/>
+        </exec>
+        <antcall target="build">
+            <param name="dist.jar.name" value="${dist.jar.name}-${revision1}.jar"/>
+        </antcall>
+
+        <echo>Building revision: ${revision2}</echo>
+        <exec executable="git" failonerror="false">
+            <arg value="checkout"/>
+            <arg value="${revision2}"/>
+        </exec>
+        <antcall target="build">
+            <param name="dist.jar.name" value="${dist.jar.name}-${revision2}.jar"/>
+        </antcall>
+
+        <zip destfile="${build.dir}/team-revisions.zip">
+            <fileset dir="${build.dir}">
+                <include name="${dist.jar.name}-${revision1}.jar"/>
+                <include name="${dist.jar.name}-${revision2}.jar"/>
+            </fileset>
+        </zip>
+
+        <echo message="––– TEAM-BUILDING DONE –––"/>
+    </target>
+
+</project>

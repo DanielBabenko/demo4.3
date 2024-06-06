@@ -4,6 +4,7 @@ import utils.Checker;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.Objects;
 
 @Entity
@@ -23,10 +24,12 @@ public class Attempt implements Serializable {
     private double y;
 
     @Column(name = "r", nullable = false)
-    private int r;
+    private double r;
 
     @Column(name = "isHit", nullable = false)
     private boolean isHit;
+
+    public boolean isValid;
 
     public Attempt() {
 
@@ -35,12 +38,12 @@ public class Attempt implements Serializable {
     public Attempt(String x, String y, String r) {
         this.x = Double.parseDouble(x);
         this.y = Double.parseDouble(y);
-        this.r = Integer.parseInt(r);
+        this.r = Double.parseDouble(r);
 
         isHit = Checker.checkHit(this.x, this.y, this.r);
     }
 
-    public Attempt(double x, double y, int r) {
+    public Attempt(double x, double y, double r) {
         this.x = x;
         this.y = y;
         this.r = r;
@@ -53,15 +56,15 @@ public class Attempt implements Serializable {
     }
 
     public double getX() {
-        return x;
+        return (double) Math.round(x * 10000) / 10000;
     }
 
     public double getY() {
-        return y;
+        return (double) Math.round(y * 10000) / 10000;
     }
 
-    public int getR() {
-        return r;
+    public double getR() {
+        return (double) Math.round(r * 10000) / 10000;
     }
 
     public boolean getIsHit() {
@@ -76,7 +79,7 @@ public class Attempt implements Serializable {
         this.y = y;
     }
 
-    public void setR(int r) {
+    public void setR(double r) {
         this.r = r;
     }
 
@@ -87,6 +90,7 @@ public class Attempt implements Serializable {
     public void updateIsHIt() {
         isHit = Checker.checkHit(this.x, this.y, this.r);
     }
+
 
     @Override
     public boolean equals(Object o) {
