@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group = 'com.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'com.sun.faces:jsf-api:2.2.18'
+    implementation 'com.sun.faces:jsf-impl:2.2.18'
+    implementation 'org.primefaces:primefaces:12.0.0'
+    implementation 'org.hibernate:hibernate-core:5.4.24.Final'
+    implementation 'org.postgresql:postgresql:42.6.0'
+    implementation 'com.jcraft:jsch:0.1.54'
+}
+
+
+tasks.register('getDeps', Copy) {
+    from sourceSets.main.runtimeClasspath
+    from sourceSets.main.compileClasspath
+    into 'lib/'
+}
+
+tasks.register('getTestDeps', Copy) {
+    from sourceSets.test.runtimeClasspath
+    into 'lib/test'
+}
+
+test {
+    useJUnitPlatform()
+}

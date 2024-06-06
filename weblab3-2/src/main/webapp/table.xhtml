@@ -1,0 +1,157 @@
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+
+<h:head>
+    <title>Проверка точки</title>
+    <link rel="stylesheet" href="styles.css"/>
+    <link rel="shortcut icon" href="images/amogus.png" type="image/x-icon"/>
+</h:head>
+<h:body>
+    <div class="container">
+        <ui:include src="header.html"/>
+
+        <div id="div_form">
+            <!--  prependId = true => id, которые внутри jsf компонентов формы, получают префикс 'form:' перед id  -->
+            <h:form id="form" prependId="false">
+                <div id="x-select" class="selects">
+                <div id="x" class="checkbox-group">
+                    <label for="x">X:</label>
+                    <p>
+                    <h:outputLabel value="-5">
+                        <h:selectBooleanCheckbox listener="#{attempts.currentAttempt.setX(-2)}" />
+                    </h:outputLabel>
+                    <h:outputLabel value="-1.5">
+                        <h:selectBooleanCheckbox value="#{attempts.currentAttempt.x}" />
+                    </h:outputLabel>
+                    <h:outputLabel value="-1">
+                        <h:selectBooleanCheckbox value="#{attempts.currentAttempt.x}" />
+                    </h:outputLabel>
+                    </p>
+                    <p>
+                    <h:outputLabel value="-0.5">
+                        <h:selectBooleanCheckbox value="#{attempts.currentAttempt.x}" />
+                    </h:outputLabel>
+                    <h:outputLabel value="0">
+                        <h:selectBooleanCheckbox value="#{attempts.currentAttempt.x}" />
+                    </h:outputLabel>
+                    <h:outputLabel value="0.5">
+                        <h:selectBooleanCheckbox value="#{attempts.currentAttempt.x}" />
+                    </h:outputLabel>
+                    </p>
+                    <p>
+                    <h:outputLabel value="1">
+                        <h:selectBooleanCheckbox value="#{attempts.currentAttempt.x}" />
+                    </h:outputLabel>
+                    <h:outputLabel value="1.5">
+                        <h:selectBooleanCheckbox value="#{attempts.currentAttempt.x}" />
+                    </h:outputLabel>
+                    <h:outputLabel value="2">
+                        <h:selectBooleanCheckbox value="#{attempts.currentAttempt.x}" />
+                    </h:outputLabel>
+                    </p>
+                </div>
+                </div>
+                <div class="selects">
+                    <label for="y">Y:</label>
+                    <h:inputText id="y" styleClass="input_y" pt:placeholder="Введите число от -3 до 3" required="true"
+                                 value="#{attempts.currentAttempt.y}">
+                        <f:validateLongRange minimum="-3" maximum="3"/>
+                    </h:inputText>
+                </div>
+
+                <div class="selects">
+                    <label for="r">R:</label>
+                    <h:selectOneMenu id="r" value = "#{attempts.currentAttempt.r}" onchange="updateCanvas()">
+                        <f:selectItem itemValue = "1" itemLabel = "1" />
+                        <f:selectItem itemValue = "1.5" itemLabel = "1.5" />
+                        <f:selectItem itemValue = "2" itemLabel = "2" />
+                        <f:selectItem itemValue = "2.5" itemLabel = "2.5" />
+                        <f:selectItem itemValue = "3" itemLabel = "3" />
+                    </h:selectOneMenu>
+                </div>
+
+                <div class="selects">
+                <p>
+                    <!--  commandButton преобразуется в input[type="submit"]-->
+                    <h:commandButton styleClass="buttons" value="Отправить форму">
+                        <f:ajax listener="#{attempts.addFromForm()}" render="tablePanel" execute="form"
+                                onevent="handleSubmit"/>
+                    </h:commandButton>
+                    <br/>
+                    <br/>
+                    <h:commandButton styleClass="buttons" value="Очистить попытки">
+                        <f:ajax listener="#{attempts.clear()}" render="tablePanel"
+                                onevent="handleClear"/>
+                    </h:commandButton>
+                </p>
+
+                <p class="error-message">
+
+                </p>
+                </div>
+            </h:form>
+
+        </div>
+
+        <div class="resulting">
+            <h:panelGroup id="tablePanel">
+                <h:dataTable id="dataTable" value="#{attempts.attempts}" var="attempt"
+                             styleClass="attemptsTable"
+                             headerClass="employeeTableHeader"
+                             rowClasses="employeeTableOddRow,employeeTableEvenRow">
+
+                    <h:column>
+                        <f:facet name="header">X</f:facet>
+                        <h:outputText value="#{attempt.x}"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Y</f:facet>
+                        #{attempt.y}
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">R</f:facet>
+                        #{attempt.r}
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">isHit</f:facet>
+                        #{attempt.isHit}
+                    </h:column>
+                </h:dataTable>
+            </h:panelGroup>
+        </div>
+    </div>
+
+    <div id="div_canvas">
+        <canvas id="canvas" width="450px" height="450px">
+
+        </canvas>
+    </div>
+
+    <p:remoteCommand name="addAttempt" action="#{attempts.addFromCanvas()}" update="tablePanel"
+                     oncomplete="updateCanvas()"/>
+
+    <div class="resulting">
+        <p>
+            <a href="index.xhtml">На Главную</a>
+        </p>
+    </div>
+
+    <script src="js/draw.js" type="text/javascript"></script>
+    <script src="js/validate.js" type="text/javascript"></script>
+    <script src="js/handleChangeCommandLink.js" type="text/javascript"></script>
+    <script src="js/handleButtons.js" type="text/javascript"></script>
+</h:body>
+
+</html>

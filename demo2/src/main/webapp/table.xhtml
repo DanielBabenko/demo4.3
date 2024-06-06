@@ -1,0 +1,125 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html">
+
+<h:head>
+     <meta http-equiv="Content-Type" content="text/html"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="styles.css"/>
+    <title>Проверка точки</title>
+	<link rel="shortcut icon" href="images/amogus.png" type="image/x-icon"/>
+</h:head>
+<h:body>
+    <div class="main">
+        <ui:include src="header.html"/>
+        <form id="form2" action="${pageContext.request.contextPath}/controller" method="GET">
+            <!--@declare id="r"-->
+            <label for="x">X:</label>
+            <input type="text" id="x" name="x" placeholder="Введите X от -3 до 3" step="any" required/>
+
+        	<label for="y">Y:</label>
+        	<select name="y" id="y">
+                <option value="placeholder-like">Выберите Y от -3 до 5</option>
+                <% for (int i = -3; i <= 5; i++) {
+                    out.println("<option value='" + i + "'>" + i + "</option>");
+                 } %>
+            </select>
+
+            <label for="r">R:</label>
+             <div class="checkbox-group">
+                <p>
+<!--               <% for (int i = 1; i <= 3; i++) {-->
+<!--                  out.println("<label><input type='radio' name='r' value='" + i + "'>" + i + "</label>");-->
+<!--                } %>-->
+                </p>
+                <p>
+<!--                <% for (int i = 4; i <= 5; i++) {-->
+<!--                   out.println("<label><input type='radio' name='r' value='" + i + "'>" + i + "</label>");-->
+<!--               } %>-->
+                </p>
+             </div>
+
+            <button type="submit">Проверить</button>
+        </form>
+<!-- <div id="result" class="resulting">-->
+<!--                <table>-->
+<!--                <tr>-->
+<!--                <th> X </th>-->
+<!--                <th> Y </th>-->
+<!--                <th> R </th>-->
+<!--                <th> Результат </th>-->
+<!--                <th> Время выполнения </th>-->
+<!--                <th> Дата </th>-->
+<!--                </tr>-->
+<!--                        for (int i = 0; i < points.getAreaDataList().size(); i++) {-->
+<!--                            out.println("<tr>");-->
+<!--                            out.println("<td>" + points.getAreaDataList().get(i).getX() + "</td>");-->
+<!--                            out.println("<td>" + points.getAreaDataList().get(i).getY() + "</td>");-->
+<!--                            out.println("<td>" + points.getAreaDataList().get(i).getR() + "</td>");-->
+<!--                            out.println("<td>" + (points.getAreaDataList().get(i).getResult() ? "Попал" : "Не попал") + "</td>");-->
+<!--                            out.println("<td>" + points.getAreaDataList().get(i).getCalculationTime() + "</td>");-->
+<!--                            out.println("<td>" + points.getAreaDataList().get(i).getCalculatedAt() + "</td>");-->
+<!--                            out.println("</tr>");-->
+<!--                        } %>-->
+<!--                </table>-->
+<!--                </div>-->
+		<a href="https://media.tenor.com/OhLjIu0_Fq8AAAAd/among-us-amogus.gif"><img id="amogus" alt="Among Us" src = "images/Yellow.jpeg" class = "aboba"/></a>
+        <canvas id="plot" width="500" height="500" align=></canvas>
+		<a href="https://media.tenor.com/OhLjIu0_Fq8AAAAd/among-us-amogus.gif"><img id="dead" alt="Among Us" src = "images/lose.png" class = "aboba"/></a>
+
+        <div>
+            <h3>Time:</h3>
+            <p id="time">
+                <span id="hours" style="color: red">hh</span>
+                :
+                <span id="minutes" style="color: yellow">mm</span>
+                :
+                <span id="seconds"  style="color: green">ss</span>
+            </p>
+        </div>
+
+        <h:outputScript>
+            const UPDATE_INTERVAL_IN_MS = 6000;
+
+            let colors = ["red", "yellow", "green"];
+
+            let hours = document.getElementById("hours");
+            let minutes = document.getElementById("minutes");
+            let seconds = document.getElementById("seconds");
+
+            function setTime() {
+                let curDate = new Date();
+
+                let hh = curDate.getHours();
+                hh = (hh >= 10 ? "" : "0") + hh;
+
+                let mm = curDate.getMinutes();
+                mm = (mm >= 10 ? "" : "0") + mm;
+
+                let ss = curDate.getSeconds();
+                ss = (ss >= 10 ? "" : "0") + ss;
+
+                hours.innerText = hh;
+                minutes.innerText = mm;
+                seconds.innerText = ss;
+
+                hours.style.color = colors[(colors.indexOf(hours.style.color) + 1) % colors.length];
+                minutes.style.color = colors[(colors.indexOf(minutes.style.color) + 1) % colors.length];
+                seconds.style.color = colors[(colors.indexOf(seconds.style.color) + 1) % colors.length];
+            }
+
+            setTime();
+
+            setInterval(setTime, UPDATE_INTERVAL_IN_MS);
+        </h:outputScript>
+
+    </div>
+<!--    <script>const context = "${pageContext.request.contextPath}";</script>-->
+<!--    <script src="script2.js" charset="utf-8"></script>-->
+
+</h:body>
+</html>

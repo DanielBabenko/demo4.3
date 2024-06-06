@@ -1,0 +1,74 @@
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html">
+
+<h:head>
+    <title>Главная</title>
+    <link rel="stylesheet" href="styles.css"/>
+    <link rel="shortcut icon" href="images/amogus.png" type="image/x-icon"/>
+</h:head>
+
+<h:body>
+    <div class="container">
+        <ui:include src="header.html"/>
+
+        <div>
+            <h3>Time:</h3>
+            <p id="time">
+                <span id="hours" style="color: red">hh</span>
+                :
+                <span id="minutes" style="color: yellow">mm</span>
+                :
+                <span id="seconds"  style="color: green">ss</span>
+            </p>
+        </div>
+
+        <div>
+            <a href="table.xhtml">Основная страница</a>
+        </div>
+
+        <div>
+            <img src="images/amogus.png" alt=""/>
+        </div>
+    </div>
+    <h:outputScript>
+        const UPDATE_INTERVAL_IN_MS = 6000;
+
+        let colors = ["red", "yellow", "green"];
+
+        let hours = document.getElementById("hours");
+        let minutes = document.getElementById("minutes");
+        let seconds = document.getElementById("seconds");
+
+        function setTime() {
+            let curDate = new Date();
+
+            let hh = curDate.getHours();
+            hh = (hh >= 10 ? "" : "0") + hh;
+
+            let mm = curDate.getMinutes();
+            mm = (mm >= 10 ? "" : "0") + mm;
+
+            let ss = curDate.getSeconds();
+            ss = (ss >= 10 ? "" : "0") + ss;
+
+            hours.innerText = hh;
+            minutes.innerText = mm;
+            seconds.innerText = ss;
+
+            hours.style.color = colors[(colors.indexOf(hours.style.color) + 1) % colors.length];
+            minutes.style.color = colors[(colors.indexOf(minutes.style.color) + 1) % colors.length];
+            seconds.style.color = colors[(colors.indexOf(seconds.style.color) + 1) % colors.length];
+        }
+
+        setTime();
+
+        setInterval(setTime, UPDATE_INTERVAL_IN_MS);
+    </h:outputScript>
+</h:body>
+
+</html>
